@@ -8,6 +8,7 @@
 
 ### References
 
+* [Tuxedo Fundamentals](https://docs.oracle.com/cd/E13203_01/tuxedo/tux100/int/intbas.html)
 * [Oracle Tuxedo](http://www.oracle.com/technetwork/middleware/tuxedo/overview/index.html)
 * [Jolt Overview](https://docs.oracle.com/cd/E35855_01/tuxedo/docs12c/install/insjol.html)
 * [Jolt Javadoc](https://docs.oracle.com/cd/E13204_01/tuxwle/jolt12/javadoc/packages.html)

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: joltdemo
+
+jolt:
+  idle:
+    timeout: 300
+  default:
+    message: Howdy Tuxedo my name is Pivotal Cloud Foundry, PCF for short.
+  app:
+    address: //10.193.137.104:8080
+    pass:
+  user:
+    name:
+    pass:
+    role: myapp

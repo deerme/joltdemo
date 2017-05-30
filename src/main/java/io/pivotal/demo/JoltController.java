@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("jolt")
 public class JoltController {
@@ -22,41 +26,81 @@ public class JoltController {
     @Value("${jolt.app.address}")
     String joltAppAddress = "//127.0.0.1:8080";
 
-    @Value("${jolt.app.password}")
-    String joltAppPassword = "appPassword";
+    @Value("${jolt.app.pass}")
+    String joltAppPassword = null;
 
     @Value("${jolt.user.name}")
-    String joltUserName = "myname";
+    String joltUserName = null;
 
     @Value("${jolt.user.pass}")
-    String joltUserPass = "mysecret";
+    String joltUserPass = null;
 
     @Value("${jolt.user.role")
     String joltUserRole = "myapp";
 
+    @RequestMapping("howdy/{message}")
+    public Map<String, String> howdy(@PathVariable String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Howdy " + message);
+        return response;
+    }
+
+    @RequestMapping("ip")
+    public Map<String, String> getIp() {
+        Map<String, String> response = new HashMap<>();
+        response.put("ip", AppUtils.getIp().toString());
+        return response;
+    }
+
+    @RequestMapping("datetime")
+    public Map<String, String> getDateTime() {
+        Map<String, String> response = new HashMap<>();
+        response.put("datetime", AppUtils.now());
+        return response;
+    }
+
+    @RequestMapping("vcap/application")
+    public Map<String, Object> getVcapApplication() {
+        return CfUtils.getVcapApplication();
+    }
+
+    @RequestMapping("vcap/services")
+    public Map<String, Object> getVcapServices() {
+        return CfUtils.getVcapServices();
+    }
+
+    @RequestMapping("fake/{message}")
+    public Map<String, String> toUpperFake(@PathVariable String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("result", message.toUpperCase());
+        return response;
+    }
+
     @RequestMapping("toupper/{message}")
-    public JoltResponse toUpper(@PathVariable String message) {
+    public Map<String, String> toUpper(@PathVariable String message) {
 
         if(StringUtils.isEmpty(message)) {
             message = joltDefaultMessage;
         }
 
         JoltSession session = createSession();
-        String result;
 
         try {
             JoltRemoteService toupper = new JoltRemoteService("TOUPPER", session);
             toupper.setString("STRING", message);
             toupper.call(null);
-            result = toupper.getStringDef("STRING", null);
+            String result = toupper.getStringDef("STRING", null);
             if (!StringUtils.isEmpty(result)) {
                 System.out.println(result);
+                Map<String, String> response = new HashMap<>();
+                response.put("result", result);
+                return response;
             }
         } finally {
             session.endSession();
         }
 
-        return JoltResponse.simple(result);
+        return Collections.emptyMap();
     }
 
     private JoltSession createSession() {
@@ -67,21 +111,11 @@ public class JoltController {
     }
 
     private JoltSession createSession(JoltSessionAttributes attributes) {
-        // NoAuth is default
-        JoltSession session = new JoltSession(attributes, null, null, null, null);
-
-        switch (attributes.checkAuthenticationLevel()) {
-            case JoltSessionAttributes.APPASSWORD:
-                session = new JoltSession(attributes,
-                        null, null, null, joltAppPassword);
-                break;
-            case JoltSessionAttributes.USRPASSWORD:
-                session = new JoltSession(attributes,
-                        joltUserName, joltUserRole, joltUserPass, joltAppPassword);
-                break;
-        }
+        JoltSession session = new JoltSession(attributes,
+            joltUserName, joltUserRole, joltUserPass, joltAppPassword);
 
         return session;
     }
+
 
 }

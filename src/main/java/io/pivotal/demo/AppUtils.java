@@ -2,12 +2,35 @@ package io.pivotal.demo;
 
 import org.springframework.util.ObjectUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class ISO8601DateIO {
+public class AppUtils {
+
+    public static String getJavaVersion() {
+        String javaVersion = System.getProperty("java.version");
+        int pos = javaVersion.indexOf("-");
+        if(pos > -1) {
+            javaVersion = javaVersion.substring(0, pos);
+        }
+        return javaVersion;
+    }
+
+    public static InetAddress getIp() {
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getLocalHost();
+            System.out.println("Your current IP address : " + ip);
+        } catch (UnknownHostException ex) {
+            ex.printStackTrace();
+        }
+
+        return ip;
+    }
 
     // The formats are as follows. Exactly the components shown here must be
     // present, with exactly this punctuation. Note that the "T" appears literally
@@ -38,7 +61,7 @@ public class ISO8601DateIO {
     // ss = two digits of second (00 through 59)
     // s = one or more digits representing a decimal fraction of a second
     // TZD = time zone designator (Z or +hh:mm or -hh:mm)
-    public static Date parse(String input) throws java.text.ParseException {
+    public static Date parseDate(String input) throws java.text.ParseException {
 
         // NOTE: SimpleDateFormat uses GMT[-+]hh:mm for the TZ which breaks
         // things a bit. Before we go on we have to repair this.
@@ -58,19 +81,18 @@ public class ISO8601DateIO {
     }
 
     /**
-     * Same as parse method but does not throw.
+     * Same as parseDate method but does not throw.
      * In case input date string cannot be parsed, null is returned.
      */
-    public static Date parseSilently(String input) {
+    public static Date parseDateSilently(String input) {
         try {
-            Date date = ObjectUtils.isEmpty(input) ? null : parse(input);
-            return date;
+            return ObjectUtils.isEmpty(input) ? null : parseDate(input);
         } catch (ParseException e) {
             return null;
         }
     }
 
-    public static String asString(Date date) {
+    public static String dateAsString(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
         TimeZone tz = TimeZone.getTimeZone("UTC");
         df.setTimeZone(tz);
@@ -79,6 +101,7 @@ public class ISO8601DateIO {
     }
 
     public static String now() {
-        return asString(new Date());
+        return dateAsString(new Date());
     }
+
 }
